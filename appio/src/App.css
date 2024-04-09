@@ -38,6 +38,7 @@
     transform: rotate(360deg);
   }
 }
+
 .footer{
   background-color: blue;
   min-height: 10%;
@@ -47,8 +48,22 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: chocolate;
-  position: bottom;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 }
-.Contenedor{
-  background-color: #61dafb;
+
+.Contenedor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 120px);
+  padding: 20px;
+}
+
+.Contenedor Button {
+  width: 350px;
+  height: 50px;
+  margin-bottom: 10px;
 }
