@@ -1,23 +1,49 @@
-import logo from './logo.svg';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        App para el curso de IO
       </header>
+      <div className = "Contenedor">
+        <button>
+          Rutas más cortas
+        </button>
+      </div>
+      <div className = "Contenedor">
+        <button>
+          Problema de la Mochila
+        </button>
+      </div>
+      <div className = "Contenedor">
+        <button>
+          Reemplazo de equipos
+        </button>
+      </div>
+      <div className = "Contenedor">
+        <button>
+          Árboles binarios de búsqueda óptimos
+        </button>
+      </div>
+      <div className = "Contenedor">
+        <button>
+          Series deportivas
+        </button>
+      </div>
+      <div className = "Contenedor">
+        <button>
+          Multiplicación de matrices
+        </button>
+      </div>
+      <div className = "Contenedor">
+        <button>
+          Salir del Programa
+        </button>
+      </div>
+      <footer>
+        Grupo Dinamita
+      </footer> 
     </div>
   );
 }
