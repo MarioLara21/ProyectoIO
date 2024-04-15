@@ -2,6 +2,8 @@
   background-color: #4285f4;
   padding: 1.5rem 0 0.5rem 0;
   display: flex;
+  position: relative;
+  min-height: 50vh;
   flex-direction: column;
   justify-content: space-between;
 }
