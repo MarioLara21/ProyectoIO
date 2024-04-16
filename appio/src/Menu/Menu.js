@@ -68,9 +68,11 @@ const Menu = () => {
             Multiplicación de matrices
           </Button>
         </Tooltip>
+        <Tooltip title="Opción para salir del programa." arrow placement='right'>
         <Button variant="contained" color="primary">
           Salir del programa
         </Button>
+        </Tooltip>
       </div>
       <Footer />
     </div>
