@@ -14,6 +14,24 @@ const NodeInputWindow = () => {
   });
   const [nodeNames, setNodeNames] = useState(Array.from({ length: nodes }, (_, index) => `Node ${index + 1}`));
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const lines = reader.result.split('\n');
+      const data = lines.map(line => line.split(',').map(value => parseInt(value, 10)));
+      const n = data.length; // Obtener la cantidad de nodos del tamaño del archivo
+      setNodes(n);
+      setNodeNames(Array.from({ length: n }, (_, index) => `Node ${index + 1}`));
+      localStorage.setItem('fileData', JSON.stringify(data));
+      localStorage.setItem(NODE_COUNT_KEY, n.toString());
+      navigate('/floyds-algorithm'); // Navegar a la siguiente pestaña
+    };
+
+    reader.readAsText(file);
+  };
+
   const handleNodeChange = (event) => {
     const newNodes = parseInt(event.target.value);
     if (newNodes >= 1 && newNodes <= 10) {
@@ -31,7 +49,6 @@ const NodeInputWindow = () => {
   const handleSubmit = () => {
     localStorage.setItem(NODE_COUNT_KEY, nodes.toString());
     localStorage.setItem('nodeNames', JSON.stringify(nodeNames));
-    // You may want to store node names in localStorage here if needed.
     navigate('/floyds-algorithm');
   };
 
@@ -59,9 +76,20 @@ const NodeInputWindow = () => {
             style={{ margin: "5px 5px" }}
           />
         ))}
-        <Button variant="contained" color="primary" style={{ marginTop: "10px" }} onClick={handleSubmit}>
+        <Button variant="contained" color="primary" style={{ margin: "10px 10px" }} onClick={handleSubmit}>
           Submit
         </Button>
+        <input
+          type="file"
+          id="file-input"
+          style={{ display: 'none' }} // Ocultar la entrada de archivo
+          onChange={handleFileUpload}
+        />
+        <label htmlFor="file-input">
+          <Button variant="contained" component="span"> {/* Botón MUI */}
+            Upload File
+          </Button>
+        </label>
       </Box>
       <Footer />
     </div>

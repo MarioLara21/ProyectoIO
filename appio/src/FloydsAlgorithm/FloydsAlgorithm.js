@@ -21,12 +21,22 @@ const FloydsAlgorithm = () => {
     if (storedNodes) {
       const n = parseInt(storedNodes);
       setNodes(n);
-      setDistances(Array(n).fill(0).map(() => Array(n).fill(-1)));
+      setDistances(Array(n).fill(0).map(() => Array(n).fill(0)));
       setPaths(Array(n).fill(0).map(() => Array(n).fill(null)));
       const storedNodeNames = localStorage.getItem('nodeNames');
       if (storedNodeNames) {
         const names = JSON.parse(storedNodeNames);
         setNodeNames(names);
+      }
+      const storedData = localStorage.getItem('fileData');
+      console.log("Stored Data: ", storedData);
+      if (storedData) {
+        const data = JSON.parse(storedData);
+        const updatedData = data.map(row => {
+          return row.map(item => (item === null ? "Inf" : item));
+        });
+        console.log("Updated Data: ", updatedData);
+        setDistances(updatedData);
       }
     }
   }, []);
@@ -44,7 +54,7 @@ const FloydsAlgorithm = () => {
     const path = JSON.parse(JSON.stringify(paths));
 
     const mirrorDist = dist.map(row =>
-      row.map(value => (value === -1 ? MAX_VALUE : value))
+      row.map(value => (value === "Inf" ? MAX_VALUE : value))
     );
 
     console.log("Distancias: ", mirrorDist);
@@ -75,7 +85,7 @@ const FloydsAlgorithm = () => {
     }
 
     const restoredDist = mirrorDist.map(row =>
-      row.map(value => (value === MAX_VALUE ? -1 : value))
+      row.map(value => (value === MAX_VALUE ? "Inf" : value))
     );
 
     setDistances(restoredDist);
@@ -148,15 +158,18 @@ const FloydsAlgorithm = () => {
               <TableCell>{nodeName}</TableCell>
               {nodeNames.map((_, colIndex) => (
                 <TableCell key={colIndex}>
-                  <TextField
-                    value={distances[rowIndex][colIndex] === -1 ? -1 : distances[rowIndex][colIndex]}
-                    onChange={(event) => {
-                      const newValue = parseInt(event.target.value);
-                      handleDistanceChange(rowIndex, colIndex, isNaN(newValue) ? -1 : newValue);
-                    }}
-                    type="number"
-                    InputProps={{ inputProps: { min: -1 } }}
-                  />
+                  {distances[rowIndex][colIndex] === "Inf" ? (
+                    "Inf"
+                  ) : (
+                    <TextField
+                      value={distances[rowIndex][colIndex]}
+                      onChange={(event) => {
+                        const newValue = event.target.value;
+                        handleDistanceChange(rowIndex, colIndex, isNaN(newValue) ? "Inf" : parseInt(newValue));
+                      }}
+                      type="number"
+                    />
+                  )}
                 </TableCell>
               ))}
             </TableRow>
