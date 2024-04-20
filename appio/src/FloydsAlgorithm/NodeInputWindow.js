@@ -38,7 +38,9 @@ const NodeInputWindow = () => {
   return (
     <div>
       <Navbar />
-      <Typography variant="h4">Floyd's Algorithm</Typography>
+      <div style={{ textAlign: "center", margin: "30px 30px" }}>
+        <Typography variant="h4">Floyd's Algorithm</Typography>
+      </div>
       <Box display="flex" flexDirection="column" alignItems="center" mb={15}>
         <TextField
           label="Number of Nodes"
@@ -46,6 +48,7 @@ const NodeInputWindow = () => {
           onChange={handleNodeChange}
           type="number"
           InputProps={{ inputProps: { min: 1, max: 10 } }}
+          sx={{ width: '130px' }}
         />
         {nodeNames.map((nodeName, index) => (
           <TextField
@@ -53,9 +56,10 @@ const NodeInputWindow = () => {
             label={`Node ${index + 1}`}
             value={nodeName}
             onChange={(e) => handleNodeNameChange(index, e.target.value)}
+            style={{ margin: "5px 5px" }}
           />
         ))}
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <Button variant="contained" color="primary" style={{ marginTop: "10px" }} onClick={handleSubmit}>
           Submit
         </Button>
       </Box>
