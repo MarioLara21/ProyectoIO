@@ -28,8 +28,8 @@ const DataCollection = () => {
 
   const handleAnnualDataChange = (index, field, value) => {
     const newData = [...annualData];
-    newData[index] = { 
-      ...newData[index], 
+    newData[index] = {
+      ...newData[index],
       [field]: parseFloat(value) // Update the specific field (resaleValue or maintenanceCost)
     };
     setAnnualData(newData);
@@ -45,6 +45,46 @@ const DataCollection = () => {
     localStorage.setItem('equipmentReplacementData', JSON.stringify(data));
     window.location.href = '/equipment-replacement';
   };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const lines = reader.result.split('\n');
+
+      // Extraer la primera fila para obtener los valores iniciales
+      const initialLine = lines[1]; // La segunda fila tiene los valores iniciales
+      const initialValues = initialLine.split(',').map((value) => parseInt(value, 10));
+
+      const initialCost = initialValues[0]; // Primer valor para `InitialCost`
+      const projectDuration = initialValues[1]; // Segundo valor para `ProjectDuration`
+      const equipmentLifetime = initialValues[2]; // Tercer valor para `EquipmentLifetime`
+
+      // Procesar el resto de las filas para obtener datos anuales
+      const headers = lines[2].split(','); // La tercera fila contiene los encabezados de datos anuales
+      const annualData = lines.slice(3).map((line) => {
+        const values = line.split(',');
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header.trim()] = parseInt(values[index].trim(), 10); // Convertir a número
+        });
+        return obj;
+      });
+      const data = {
+        initialCost,
+        projectDuration,
+        equipmentLifetime,
+        annualData,
+      };
+      localStorage.setItem('equipmentReplacementData', JSON.stringify(data));
+      window.location.href = '/equipment-replacement';
+    };
+
+    reader.readAsText(file); // Leer el archivo
+  };
+
+
 
   return (
     <div>
@@ -115,6 +155,17 @@ const DataCollection = () => {
         <Button variant="contained" color="primary" style={{ margin: "30px 30px" }} onClick={handleCalculateClick}>
           Calculate Replacement Plan
         </Button>
+        <input
+          type="file"
+          id="file-input"
+          style={{ display: 'none' }} // Ocultar la entrada de archivo
+          onChange={handleFileUpload}
+        />
+        <label htmlFor="file-input">
+          <Button variant="contained" component="span"> {/* Botón MUI */}
+            Upload File
+          </Button>
+        </label>
       </Box>
       <Footer />
     </div>
