@@ -1,129 +1,150 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import {
+  Typography,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Button,
+} from '@mui/material';
+import Footer from '../Footer/Footer';
+import Navbar from '../Navbar/Navbar';
 
-const ReplacementAlgorithm = () => {
-  const [data, setData] = useState(null);
+const EquipmentReplacement = () => {
   const [results, setResults] = useState([]);
-  const [calculationMethod, setCalculationMethod] = useState('columna');
+  const [iteration, setIteration] = useState(0); // Controla el índice de iteración
 
   useEffect(() => {
     const storedData = localStorage.getItem('equipmentReplacementData');
     if (storedData) {
-      setData(JSON.parse(storedData));
+      const { initialCost, projectDuration, equipmentLifetime, annualData } = JSON.parse(storedData);
+      const costs = calculateReplacementPlan(projectDuration, initialCost, equipmentLifetime, annualData);
+      setResults(costs); // No invertir, mantener el orden de menor a mayor
     }
-  }, []);
+  }, []); // Esto ejecutará la función una vez al montar el componente
 
-  useEffect(() => {
-    if (data) {
-      const calculatedResults = calculationMethod === 'iteración' ? calculateByIteration() : calculateByColumn();
-      setResults(calculatedResults);
+  const handleNextIteration = () => {
+    if (iteration < results.length - 1) {
+      setIteration(iteration + 1); // Incrementar el índice de iteración
     }
-  }, [data, calculationMethod]);
+  };
 
-  const calculateByIteration = () => {
-    const { initialCost, projectDuration, equipmentLifetime, annualData, inflationRate } = data;
-    const iterations = [];
+  function calculateCtx(t, x, costInitial, annualData) {
+    let totalMaintenance = 0;
+    let differenceInstance = Math.abs(t - x);
+    for (let i = 1; i <= differenceInstance; i++) {
+      const cost = annualData.find((data) => data.year === i);
+      totalMaintenance += cost.maintenanceCost;
+    }
+    return costInitial + totalMaintenance - annualData.find((data) => data.year === differenceInstance).resaleValue;
+  }
 
-    for (let i = 1; i <= projectDuration; i++) {
-      const iteration = {};
-      iteration.period = i;
+  function getMin(list) {
+    const minItem = list.reduce((min, item) => {
+      return item.valor < min.valor ? item : min;
+    }, list[0]);
 
-      if (i <= equipmentLifetime) {
-        const { resaleValue, maintenanceCost, gain } = annualData[i - 1];
-        iteration.resaleValue = resaleValue;
-        iteration.maintenanceCost = maintenanceCost;
-        iteration.gain = gain || 0;
-      } else {
-        iteration.resaleValue = 0;
-        iteration.maintenanceCost = 0;
-        iteration.gain = 0;
+    const minValue = minItem.valor;
+
+    const itemsWithMinValue = list.filter((item) => item.valor === minValue);
+
+    const firstT = itemsWithMinValue[0].t;
+
+    const xValues = itemsWithMinValue.map((item) => item.x);
+
+    const result = {
+      t: firstT,
+      x: xValues,
+      valor: minValue,
+    };
+
+    return result;
+  }
+
+  function calculateReplacementPlan(projectDuration, costInitial, equipmentLifetime, annualData) {
+    let costs = [];
+
+    for (let i = projectDuration; i >= 0; i--) {
+      if (i === projectDuration) {
+        let data = {
+          t: i,
+          x: [0],
+          valor: 0,
+        };
+        costs.push(data);
+        continue;
       }
 
-      iteration.inflationRate = inflationRate;
-      iteration.netCost = iteration.maintenanceCost - iteration.resaleValue - iteration.gain;
-      iteration.presentValue = iteration.netCost / Math.pow(1 + inflationRate, i);
-      iteration.cumulativePresentValue = i === 1 ? iteration.presentValue : iterations[i - 2].cumulativePresentValue + iteration.presentValue;
-      iteration.optimalReplacement = iteration.cumulativePresentValue < initialCost ? 'Keep' : 'Replace';
+      let min = [];
+      for (let x = i + 1; Math.abs(i - x) <= equipmentLifetime && x <= projectDuration; x++) {
+        let ctx = calculateCtx(i, x, costInitial, annualData);
+        let v = costs.find((data) => data.t === x);
 
-      iterations.push(iteration);
+        if (!costs.find((data) => data.t === i && data.x.includes(x))) {
+          min.push({
+            t: i,
+            x: [x],
+            valor: ctx + v.valor,
+          });
+        }
+      }
+
+      costs.push(getMin(min));
     }
 
-    return iterations;
-  };
-
-  const calculateByColumn = () => {
-    const { initialCost, projectDuration, equipmentLifetime, annualData, inflationRate } = data;
-    const columns = [];
-
-    for (let i = 1; i <= projectDuration; i++) {
-      const column = {};
-      column.period = i;
-      column.resaleValue = i <= equipmentLifetime ? annualData[i - 1].resaleValue : 0;
-      column.maintenanceCost = i <= equipmentLifetime ? annualData[i - 1].maintenanceCost : 0;
-      column.gain = i <= equipmentLifetime ? annualData[i - 1].gain || 0 : 0;
-      column.inflationRate = inflationRate;
-      column.netCost = column.maintenanceCost - column.resaleValue - column.gain;
-      column.presentValue = column.netCost / Math.pow(1 + inflationRate, i);
-      columns.push(column);
-    }
-
-    const cumulativePresentValues = columns.reduce((acc, cur) => {
-      const lastValue = acc.length > 0 ? acc[acc.length - 1] : 0;
-      acc.push(lastValue + cur.presentValue);
-      return acc;
-    }, []);
-
-    columns.forEach((column, index) => {
-      column.cumulativePresentValue = cumulativePresentValues[index];
-      column.optimalReplacement = column.cumulativePresentValue < initialCost ? 'Keep' : 'Replace';
-    });
-
-    return columns;
-  };
+    return costs;
+  }
 
   return (
     <div>
-      <Typography variant="h4">Replacement Plan</Typography>
-      <Typography>Calculation Method: {calculationMethod === 'iteración' ? 'Iteration' : 'Column'}</Typography>
-      <button onClick={() => setCalculationMethod(calculationMethod === 'iteración' ? 'columna' : 'iteración')}>
-        Switch to {calculationMethod === 'iteración' ? 'Column' : 'Iteration'}
-      </button>
-      {data ? (
-        <Table>
+      <Navbar />
+      <div style={{ textAlign: "center", margin: "30px 30px" }}>
+        <Typography variant="h4">Equipment Replacement</Typography>
+      </div>
+      <Box
+        display="flex" // Para centrar toda la tabla
+        justifyContent="center"
+        alignItems="center"
+        margin={10}
+      >
+        <Table style={{ width: '50%' }}> {/* Controlar el ancho de la tabla */}
           <TableHead>
             <TableRow>
-              <TableCell>Period</TableCell>
-              <TableCell>Resale Value</TableCell>
-              <TableCell>Maintenance Cost</TableCell>
-              <TableCell>Gain</TableCell>
-              <TableCell>Inflation Rate</TableCell>
-              <TableCell>Net Cost</TableCell>
-              <TableCell>Present Value</TableCell>
-              <TableCell>Cumulative Present Value</TableCell>
-              <TableCell>Optimal Replacement</TableCell>
+              {/* Centrando los encabezados */}
+              <TableCell style={{ textAlign: 'center' }}>T</TableCell>
+              <TableCell style={{ textAlign: 'center' }}>Valor</TableCell>
+              <TableCell style={{ textAlign: 'center' }}>X</TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
-            {results.map((result, index) => (
+            {results.slice(0, iteration + 1).map((result, index) => (
               <TableRow key={index}>
-                <TableCell>{result.period}</TableCell>
-                <TableCell>{result.resaleValue}</TableCell>
-                <TableCell>{result.maintenanceCost}</TableCell>
-                <TableCell>{result.gain}</TableCell>
-                <TableCell>{result.inflationRate}</TableCell>
-                <TableCell>{result.netCost}</TableCell>
-                <TableCell>{result.presentValue.toFixed(2)}</TableCell>
-                <TableCell>{result.cumulativePresentValue.toFixed(2)}</TableCell>
-                <TableCell>{result.optimalReplacement}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{result.t}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{result.valor}</TableCell>
+                <TableCell style={{ textAlign: 'center' }}>{result.x.join(", ")}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      ) : (
-        <Typography>No data available. Please collect data first.</Typography>
-      )}
+
+        <Box style={{ textAlign: 'center', margin: '30px 30px' }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleNextIteration}
+            disabled={iteration >= results.length - 1}
+            style={{ margin: '30px 30px' }}
+          >
+            Next Iteration
+          </Button>
+        </Box>
+      </Box>
+      <Footer />
     </div>
   );
 };
 
-export default ReplacementAlgorithm;
+export default EquipmentReplacement;

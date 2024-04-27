@@ -10,13 +10,17 @@ const DataCollection = () => {
   const [annualData, setAnnualData] = useState([]);
 
   useEffect(() => {
-    // Adjust the annual data array based on equipment lifetime
     const adjustedData = Array.from({ length: equipmentLifetime }, (_, index) => {
-      // Get existing data if it exists, otherwise initialize with default values
-      return annualData[index] || { resaleValue: 0, maintenanceCost: 0, gain: 0 };
+      // Retain existing data if it exists, otherwise initialize with defaults
+      const existingData = annualData[index] || { resaleValue: 0, maintenanceCost: 0 };
+      return {
+        year: index + 1, // Ensures that year is included
+        resaleValue: existingData.resaleValue,
+        maintenanceCost: existingData.maintenanceCost,
+      };
     });
     setAnnualData(adjustedData);
-  }, [equipmentLifetime]);
+  }, [equipmentLifetime]); // Triggers update when equipmentLifetime changes
 
   const handleInputChange = (e, setter) => {
     setter(parseInt(e.target.value, 10));
@@ -24,7 +28,10 @@ const DataCollection = () => {
 
   const handleAnnualDataChange = (index, field, value) => {
     const newData = [...annualData];
-    newData[index] = { ...newData[index], [field]: parseFloat(value) };
+    newData[index] = { 
+      ...newData[index], 
+      [field]: parseFloat(value) // Update the specific field (resaleValue or maintenanceCost)
+    };
     setAnnualData(newData);
   };
 
@@ -36,7 +43,7 @@ const DataCollection = () => {
       annualData,
     };
     localStorage.setItem('equipmentReplacementData', JSON.stringify(data));
-    window.location.href = '/algorithm-calculation';
+    window.location.href = '/equipment-replacement';
   };
 
   return (
@@ -45,8 +52,8 @@ const DataCollection = () => {
       <div style={{ textAlign: "center", margin: "30px 30px" }}>
         <Typography variant="h4">Equipment Replacement Data Collection</Typography>
       </div>
-      <Box display="flex" flexDirection="column" alignItems="center" mb={5} >
-        <Box display="flex" flexDirection="row" justifyContent={"center"} mb={5} >
+      <Box display="flex" flexDirection="column" alignItems="center" mb={5}>
+        <Box display="flex" flexDirection="row" justifyContent="center" mb={5}>
           <TextField
             label="Initial Cost"
             type="number"
@@ -81,13 +88,12 @@ const DataCollection = () => {
               <TableCell>Year</TableCell>
               <TableCell>Resale Value</TableCell>
               <TableCell>Maintenance Cost</TableCell>
-              <TableCell>Gain</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {annualData.map((data, index) => (
               <TableRow key={index}>
-                <TableCell>{index + 1}</TableCell>
+                <TableCell>{data.year}</TableCell> {/* Display the year */}
                 <TableCell>
                   <TextField
                     type="number"
@@ -102,13 +108,6 @@ const DataCollection = () => {
                     onChange={(e) => handleAnnualDataChange(index, 'maintenanceCost', e.target.value)}
                   />
                 </TableCell>
-                <TableCell>
-                  <TextField
-                    type="number"
-                    value={data.gain || ''}
-                    onChange={(e) => handleAnnualDataChange(index, 'gain', e.target.value)}
-                  />
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -117,7 +116,7 @@ const DataCollection = () => {
           Calculate Replacement Plan
         </Button>
       </Box>
-      < Footer />
+      <Footer />
     </div>
   );
 };
