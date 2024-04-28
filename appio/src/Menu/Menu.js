@@ -21,6 +21,7 @@ const Menu = () => {
         navigate('/equipment-input');
         break;
       case 4:
+        navigate('/binary-search-input');
         break;
       case 5:
         break;
@@ -55,7 +56,7 @@ const Menu = () => {
           </Button>
         </Tooltip>
         <Tooltip title="Crea árboles binarios de búsqueda óptimos que minimicen el tiempo de búsqueda promedio para una secuencia de claves dada." arrow placement='right'>
-          <Button variant="contained" color="primary">
+          <Button variant="contained" color="primary" onClick={() => setSomeId(4)}>
             Árboles binarios de búsqueda óptimos
           </Button>
         </Tooltip>
