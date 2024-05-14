@@ -29,13 +29,11 @@ const FloydsAlgorithm = () => {
         setNodeNames(names);
       }
       const storedData = localStorage.getItem('fileData');
-      console.log("Stored Data: ", storedData);
       if (storedData) {
         const data = JSON.parse(storedData);
         const updatedData = data.map(row => {
           return row.map(item => (item === null ? "Inf" : item));
         });
-        console.log("Updated Data: ", updatedData);
         setDistances(updatedData);
       }
     }
@@ -146,18 +144,18 @@ const FloydsAlgorithm = () => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>From/To</TableCell>
+            <TableCell style={{ width: '150px' }}>From/To</TableCell>
             {nodeNames.map((nodeName, index) => (
-              <TableCell key={index}>{nodeName}</TableCell>
+              <TableCell key={index} style={{ width: '150px' }}>{nodeName}</TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
           {nodeNames.map((nodeName, rowIndex) => (
             <TableRow key={rowIndex}>
-              <TableCell>{nodeName}</TableCell>
+              <TableCell style={{ width: '150px' }}>{nodeName}</TableCell>
               {nodeNames.map((_, colIndex) => (
-                <TableCell key={colIndex}>
+                <TableCell key={colIndex} style={{ width: '150px' }}>
                   {distances[rowIndex][colIndex] === "Inf" ? (
                     "Inf"
                   ) : (
@@ -168,6 +166,7 @@ const FloydsAlgorithm = () => {
                         handleDistanceChange(rowIndex, colIndex, isNaN(newValue) ? "Inf" : parseInt(newValue));
                       }}
                       type="number"
+                      style={{ width: '120px' }}
                     />
                   )}
                 </TableCell>
