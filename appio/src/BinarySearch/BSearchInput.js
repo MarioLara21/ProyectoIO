@@ -104,7 +104,7 @@ const BSearchInput = () => {
           value={numKeys}
           onChange={handleNumKeysChange}
           margin="normal"
-          inputProps={{ min: 1, max: 10 }}
+          inputProps={{ min: 1}}
         />
         <TableContainer component={Paper}>
           <Table>
