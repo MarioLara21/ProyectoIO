@@ -12,7 +12,12 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
+import Tree from 'react-d3-tree'; // Importamos react-d3-tree
 
 const BSearch = () => {
   const [keys, setKeys] = useState([]);
@@ -21,6 +26,8 @@ const BSearch = () => {
   const [rootTable, setRootTable] = useState([]); // Nueva tabla para raíces
   const [iteration, setIteration] = useState(0);
   const [currentHighlights, setCurrentHighlights] = useState([]);
+  const [showTree, setShowTree] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const storedData = JSON.parse(localStorage.getItem('bSearchData'));
@@ -80,6 +87,15 @@ const BSearch = () => {
       setCurrentHighlights(newHighlights); // Resaltar casillas relevantes
       setIteration(diagonal); // Avanzar a la siguiente iteración
     }
+  };
+
+  const handleOpenDialog = () => {
+    setShowTree(true);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
   };
 
   return (
@@ -172,10 +188,52 @@ const BSearch = () => {
           >
             Next Iteration
           </Button>
+          < Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenDialog}
+            disabled={iteration < keys.length - 1}
+            style={{ margin: '30px 30px' }}
+          >
+            Show Tree
+          </Button>
         </Box>
       </Box>
       <Footer />
+      {showTree && <TreeView keys={keys} rootTable={rootTable} dialogOpen={dialogOpen} handleCloseDialog={handleCloseDialog}/>}
     </div>
+  );
+};
+
+const TreeView = ({ keys, rootTable, dialogOpen, handleCloseDialog }) => {
+  const generateTree = (root, start, end) => {
+    if (start > end) return null;
+    const mid = rootTable[start][end];
+    return {
+      name: keys[mid],
+      children: [
+        generateTree(mid, start, mid - 1),
+        generateTree(mid, mid + 1, end)
+      ].filter(Boolean)
+    };
+  };
+
+  const treeData = generateTree(null, 0, keys.length - 1);
+
+  return (
+    <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+      <DialogTitle>Tree Visualization</DialogTitle>
+      <DialogContent>
+        <div style={{ width: '500px', height: '500px' }}> {/* Ajusta el tamaño del árbol según sea necesario */}
+          <Tree data={treeData} orientation="vertical" />
+        </div>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseDialog} color="primary">
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
