@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, TextField, Typography, Box } from '@mui/material';
 import Navbar from '../Navbar/Navbar';
@@ -14,6 +14,10 @@ const NodeInputWindow = () => {
   });
   const [nodeNames, setNodeNames] = useState(Array.from({ length: nodes }, (_, index) => `Node ${index + 1}`));
 
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
+
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -24,6 +28,7 @@ const NodeInputWindow = () => {
       const n = data.length; // Obtener la cantidad de nodos del tamaño del archivo
       setNodes(n);
       setNodeNames(Array.from({ length: n }, (_, index) => `Node ${index + 1}`));
+      localStorage.setItem('nodeNames', JSON.stringify(nodeNames));
       localStorage.setItem('fileData', JSON.stringify(data));
       localStorage.setItem(NODE_COUNT_KEY, n.toString());
       navigate('/floyds-algorithm'); // Navegar a la siguiente pestaña
@@ -34,7 +39,7 @@ const NodeInputWindow = () => {
 
   const handleNodeChange = (event) => {
     const newNodes = parseInt(event.target.value);
-    if (newNodes >= 1 && newNodes <= 10) {
+    if (newNodes >= 1) {
       setNodes(newNodes);
       setNodeNames(Array.from({ length: newNodes }, (_, index) => nodeNames[index] || `Node ${index + 1}`));
     }
@@ -64,7 +69,7 @@ const NodeInputWindow = () => {
           value={nodes}
           onChange={handleNodeChange}
           type="number"
-          InputProps={{ inputProps: { min: 1, max: 10 } }}
+          InputProps={{ inputProps: { min: 1 } }}
           sx={{ width: '130px' }}
         />
         {nodeNames.map((nodeName, index) => (
