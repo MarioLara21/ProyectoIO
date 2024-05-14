@@ -10,7 +10,7 @@ const NodeInputWindow = () => {
   const navigate = useNavigate();
   const [nodes, setNodes] = useState(() => {
     const storedNodes = localStorage.getItem(NODE_COUNT_KEY);
-    return storedNodes ? parseInt(storedNodes) : 0;
+    return storedNodes ? parseInt(storedNodes) : 5;
   });
   const [nodeNames, setNodeNames] = useState(Array.from({ length: nodes }, (_, index) => `Node ${index + 1}`));
 
