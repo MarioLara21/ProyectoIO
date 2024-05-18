@@ -14,18 +14,27 @@ const FloydsAlgorithm = () => {
   const [endNode, setEndNode] = useState('');
   const [resultPath, setResultPath] = useState([]);
   const [nodeNames, setNodeNames] = useState([]);
+  const [iterationsCompleted, setIterationsCompleted] = useState(false); // Nueva variable de estado
 
   useEffect(() => {
     const storedNodes = localStorage.getItem(NODE_COUNT_KEY);
     if (storedNodes) {
       const n = parseInt(storedNodes);
       setNodes(n);
-      setDistances(Array(n).fill(0).map(() => Array(n).fill(-1)));
-      setPaths(Array(n).fill(0).map(() => Array(n).fill(0)));
+      setDistances(Array(n).fill(0).map(() => Array(n).fill(0)));
+      setPaths(Array(n).fill(0).map(() => Array(n).fill(null)));
       const storedNodeNames = localStorage.getItem('nodeNames');
       if (storedNodeNames) {
         const names = JSON.parse(storedNodeNames);
         setNodeNames(names);
+      }
+      const storedData = localStorage.getItem('fileData');
+      if (storedData) {
+        const data = JSON.parse(storedData);
+        const updatedData = data.map(row => {
+          return row.map(item => (item === null ? "Inf" : item));
+        });
+        setDistances(updatedData);
       }
     }
   }, []);
@@ -43,15 +52,29 @@ const FloydsAlgorithm = () => {
     const path = JSON.parse(JSON.stringify(paths));
 
     const mirrorDist = dist.map(row =>
-      row.map(value => (value === -1 ? MAX_VALUE : value))
+      row.map(value => (value === "Inf" ? MAX_VALUE : value))
     );
+
+    console.log("Distancias: ", mirrorDist);
+
+    // //necesito que los valores que no tengan infinito sean -2 en el path
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        if (mirrorDist[i][j] === MAX_VALUE) {
+          path[i][j] = null;
+        } else if ((0 > path[i][j] || path[i][j] > nodes - 1) || path[i][j] === null) {
+          path[i][j] = -2;
+        }
+      }
+    }
+
+    // console.log("Distancias: ", mirrorDist);
+    console.log("Rutas: ", path);
 
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
-        console.log("CurrentIteration: ", currentIteration);
         if (i !== currentIteration && j !== currentIteration) {
           if (mirrorDist[i][j] > mirrorDist[i][currentIteration] + mirrorDist[currentIteration][j]) {
-            console.log("i: ", i, " j: ", j, " mirrorDist[i][j]: ", mirrorDist[i][j], " mirrorDist[i][k]: ", mirrorDist[i][currentIteration], "mirrorDist[k][j]: ", mirrorDist[currentIteration][j], "Suma: ", mirrorDist[i][currentIteration] + mirrorDist[currentIteration][j])
             mirrorDist[i][j] = mirrorDist[i][currentIteration] + mirrorDist[currentIteration][j];
             path[i][j] = currentIteration;
           }
@@ -60,40 +83,46 @@ const FloydsAlgorithm = () => {
     }
 
     const restoredDist = mirrorDist.map(row =>
-      row.map(value => (value === MAX_VALUE ? -1 : value))
+      row.map(value => (value === MAX_VALUE ? "Inf" : value))
     );
 
     setDistances(restoredDist);
     setPaths(path);
     setCurrentIteration(currentIteration + 1);
-    console.log("CurrentIteration: ", currentIteration);
-    console.log("Nodes: ", nodes - 1);
+
     if (currentIteration === nodes - 1) {
       setShowPaths(true);
+      setIterationsCompleted(true); // Marcar que las iteraciones se han completado
     }
   };
 
-
   const getPath = (start, end) => {
-    if (!paths[start] || !paths[start][end]) {
-      return [];
-    }
-  
+
+    console.log("Start: ", start);
+    console.log("End: ", end);
+
     const path = [];
     let current = start;
     path.push(nodeNames[current]);
-  
+
+    console.log("Current: ", current);
+
     while (current !== end) {
+      console.log("IN Current: ", current);
       const next = paths[current][end];
-      if (next === null || next === undefined || next < 0 || next >= nodes) {
-        return []; // Verificar si el próximo nodo es válido
+      if (next === null || next === -1) {
+        path.push('∞'); // No hay ruta directa
+        break;
+      } else if (next === -2) { // Ruta directa
+        path.push(nodeNames[end]);
+        break;
+      } else {
+        path.push(nodeNames[next]);
+        current = next;
       }
-      path.push(nodeNames[next-1]);
-      current = next;
     }
     return path;
   };
-  
 
   const handleStartNodeChange = (event) => {
     setStartNode(event.target.value);
@@ -104,6 +133,7 @@ const FloydsAlgorithm = () => {
   };
 
   const findPath = () => {
+    console.log("Rutas: ", paths);
     const start = nodeNames.indexOf(startNode);
     const end = nodeNames.indexOf(endNode);
     setResultPath(getPath(start, end));
@@ -114,27 +144,31 @@ const FloydsAlgorithm = () => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>From/To</TableCell>
+            <TableCell style={{ width: '150px' }}>From/To</TableCell>
             {nodeNames.map((nodeName, index) => (
-              <TableCell key={index}>{nodeName}</TableCell>
+              <TableCell key={index} style={{ width: '150px' }}>{nodeName}</TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
           {nodeNames.map((nodeName, rowIndex) => (
             <TableRow key={rowIndex}>
-              <TableCell>{nodeName}</TableCell>
+              <TableCell style={{ width: '150px' }}>{nodeName}</TableCell>
               {nodeNames.map((_, colIndex) => (
-                <TableCell key={colIndex}>
-                  <TextField
-                    value={distances[rowIndex][colIndex] === -1 ? -1 : distances[rowIndex][colIndex]}
-                    onChange={(event) => {
-                      const newValue = parseInt(event.target.value);
-                      handleDistanceChange(rowIndex, colIndex, isNaN(newValue) ? -1 : newValue);
-                    }}
-                    type="number"
-                    InputProps={{ inputProps: { min: -1 } }}
-                  />
+                <TableCell key={colIndex} style={{ width: '150px' }}>
+                  {distances[rowIndex][colIndex] === "Inf" ? (
+                    "Inf"
+                  ) : (
+                    <TextField
+                      value={distances[rowIndex][colIndex]}
+                      onChange={(event) => {
+                        const newValue = event.target.value;
+                        handleDistanceChange(rowIndex, colIndex, isNaN(newValue) ? "Inf" : parseInt(newValue));
+                      }}
+                      type="number"
+                      style={{ width: '120px' }}
+                    />
+                  )}
                 </TableCell>
               ))}
             </TableRow>
@@ -145,23 +179,15 @@ const FloydsAlgorithm = () => {
         variant="contained"
         color="primary"
         onClick={runNextIteration}
-        style={{ display: currentIteration < nodes ? 'block' : 'none' }}
+        disabled={iterationsCompleted} // Deshabilitar el botón cuando se completen las iteraciones
       >
         Run Next Iteration
       </Button>
-      {showPaths && (
-        <div>
-          <Typography variant="h6">Shortest Path:</Typography>
-          <Typography>
-            From {nodeNames[0]} to {nodeNames[nodes - 1]}: {getPath(0, nodes - 1).join(' -> ')}
-          </Typography>
-        </div>
-      )}
       <Typography variant="h6">Find Path:</Typography>
       <Box display="flex" alignItems="center">
         <TextField label="Start Node" value={startNode} onChange={handleStartNodeChange} />
         <TextField label="End Node" value={endNode} onChange={handleEndNodeChange} />
-        <Button variant="contained" color="primary" onClick={findPath}>
+        <Button variant="contained" color="primary" onClick={findPath} disabled={!iterationsCompleted}>
           Find Path
         </Button>
       </Box>

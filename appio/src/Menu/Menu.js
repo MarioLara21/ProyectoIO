@@ -18,8 +18,10 @@ const Menu = () => {
       case 2:
         break;
       case 3:
+        navigate('/equipment-input');
         break;
       case 4:
+        navigate('/binary-search-input');
         break;
       case 5:
         break;
@@ -49,12 +51,12 @@ const Menu = () => {
           </Button>
         </Tooltip>
         <Tooltip title="Encuentra la mejor manera de reemplazar equipos o elementos en un sistema, considerando diferentes criterios y restricciones." arrow placement='right'>
-          <Button variant="contained" color="primary">
+          <Button variant="contained" color="primary" onClick={() => setSomeId(3)}>
             Reemplazo de equipos
           </Button>
         </Tooltip>
         <Tooltip title="Crea árboles binarios de búsqueda óptimos que minimicen el tiempo de búsqueda promedio para una secuencia de claves dada." arrow placement='right'>
-          <Button variant="contained" color="primary">
+          <Button variant="contained" color="primary" onClick={() => setSomeId(4)}>
             Árboles binarios de búsqueda óptimos
           </Button>
         </Tooltip>
