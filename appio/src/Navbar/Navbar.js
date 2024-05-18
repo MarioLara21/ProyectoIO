@@ -5,7 +5,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <span className="navbar-brand">Grupo Dinamita</span>
+      <a href="/" className="navbar-brand">Grupo Dinamita</a>
       </div>
       <div className="navbar-right">
         <div className="dropdown">
