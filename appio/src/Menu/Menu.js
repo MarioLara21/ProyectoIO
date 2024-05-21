@@ -16,6 +16,7 @@ const Menu = () => {
         navigate('/floyds-input');
         break;
       case 2:
+        navigate('/knapsack-problem');
         break;
       case 3:
         navigate('/equipment-input');
@@ -46,7 +47,7 @@ const Menu = () => {
           </Button>
         </Tooltip>
         <Tooltip title="Resuelve el problema de la mochila, donde se debe determinar la combinación óptima de elementos para maximizar el valor total sin exceder el peso máximo." arrow placement='right'>
-          <Button variant="contained" color="primary">
+          <Button variant="contained" color="primary" onClick={() => setSomeId(2)}>
             Problema de la Mochila
           </Button>
         </Tooltip>
