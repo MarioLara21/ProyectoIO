@@ -6,23 +6,80 @@ import Navbar from '../Navbar/Navbar';
 
 const KnapsackResult = () => {
     const navigate = useNavigate();
-    const result = JSON.parse(localStorage.getItem('knapsackResult'));
     const itemNames = JSON.parse(localStorage.getItem('itemNames'));
     const itemValues = JSON.parse(localStorage.getItem('itemValues'));
-    const itemAmount = JSON.parse(localStorage.getItem('itemAmount'));
+    const itemAmount = JSON.parse(localStorage.getItem('itemAmounts'));
     const showExtraField = JSON.parse(localStorage.getItem('showExtraField'));
+    const capacity = JSON.parse(localStorage.getItem('capacity'));
 
     const handleBack = () => {
         navigate('/');
     };
 
-    const columns = [
-        { id: 'item', label: 'Item', minWidth: 100 },
-        { id: 'weight', label: 'Weight', minWidth: 100 },
-        { id: 'value', label: 'Value', minWidth: 100 },
-    ];
+    const maxCapacity = itemNames.length;
 
-    const rows = JSON.parse(localStorage.getItem('knapsackResult'));
+    const generateRows = (maxCapacity) => {
+        const rows = [];
+        for (let i = 0; i <= maxCapacity; i++) {
+            rows.push(i);
+        }
+        return rows;
+    };
+    const calculateBackpack = (items, capacity, amounts, bounded) => {
+        const n = items.length;
+        const dp = Array.from({ length: n + 1 }, () => Array(capacity + 1).fill(0));
+        const keep = Array.from({ length: n + 1 }, () => Array(capacity + 1).fill(0));
+    
+        if (bounded) {
+            // Bounded knapsack
+            for (let i = 1; i <= n; i++) {
+                const [weight, value] = items[i - 1];
+                const maxAmount = amounts[i - 1];
+                for (let w = 0; w <= capacity; w++) {
+                    dp[i][w] = dp[i - 1][w]; // without including current item
+                    for (let k = 1; k <= maxAmount; k++) {
+                        if (w >= k * weight) {
+                            const newValue = dp[i - 1][w - k * weight] + k * value;
+                            if (newValue > dp[i][w]) {
+                                dp[i][w] = newValue;
+                                keep[i][w] = k;
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // Unbounded knapsack
+            for (let i = 1; i <= n; i++) {
+                const [weight, value] = items[i - 1];
+                for (let w = 1; w <= capacity; w++) {
+                    if (weight <= w) {
+                        const newValue = dp[i][w - weight] + value;
+                        if (newValue > dp[i - 1][w]) {
+                            dp[i][w] = newValue;
+                            keep[i][w] = keep[i][w - weight] + 1;
+                        } else {
+                            dp[i][w] = dp[i - 1][w];
+                        }
+                    } else {
+                        dp[i][w] = dp[i - 1][w];
+                    }
+                }
+            }
+        }
+    
+        const result = [];
+        let w = capacity;
+        for (let i = n; i > 0; i--) {
+            if (keep[i][w] > 0) {
+                result.push({ itemIndex: i - 1, quantity: keep[i][w] });
+                w -= keep[i][w] * items[i - 1][0];
+            }
+        }
+    
+        return { maxValue: dp[n][capacity], selectedItems: result };
+    };
+
     return (
         <div>
             <Navbar />
@@ -51,7 +108,31 @@ const KnapsackResult = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                
+                <h1> Result Table </h1>
+
+                <TableContainer component={Paper} style={{ marginTop: 20 }}>
+                    <Table aria-label="result table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Capacidad</TableCell>
+                                {itemNames.map((itemName, index) => (
+                                    <TableCell key={index}>{itemName}</TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {generateRows(maxCapacity).map((capacity,rowIndex) => (
+                                <TableRow key={rowIndex}>
+                                    <TableCell>{capacity}</TableCell>
+                                    {itemValues.map((itemValue,itemIndex) => (
+                                        capacity >= itemValue ? <TableCell>{itemValue}</TableCell> : <TableCell>0</TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
                 <Box display="flex" justifyContent="center" alignItems="center">
                     <Typography variant="h6" gutterBottom>
                         Items to take:

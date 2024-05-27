@@ -17,7 +17,7 @@ const BackpackData = () => {
     const [itemNames, setItemNames] = useState(Array.from({ length: items }, (_, index) => `Item ${index + 1}`));
     const [itemValues, setItemValues] = useState(Array.from({ length: items }, (_, index) => `Value ${index + 1}`));
     const [itemAmount, setItemAmount] = useState(Array.from({ length: items }, (_, index) => `Amount ${index + 1}`));
-    const [showExtraField, setShowExtraField] = useState(false); // State for extra TextField visibility
+    const [showExtraField, setShowExtraField] = useState(false);
     useEffect(() => {
         localStorage.clear();
         const storedData = localStorage.getItem('backpackData');
@@ -32,39 +32,6 @@ const BackpackData = () => {
             setCapacity(capacity);
         }
     }, []);
-    const calculateBackpack = (items, capacity, amounts, bounded) => {
-        const n = items.length;
-        const dp = Array.from({ length: n + 1 }, () => Array(capacity + 1).fill(0));
-
-        if (bounded) {
-            // Bounded knapsack
-            for (let i = 1; i <= n; i++) {
-                const [weight, value] = items[i - 1];
-                const maxAmount = amounts[i - 1];
-                for (let w = 0; w <= capacity; w++) {
-                    dp[i][w] = dp[i - 1][w]; // without including current item
-                    for (let k = 1; k <= maxAmount; k++) {
-                        if (w >= k * weight) {
-                            dp[i][w] = Math.max(dp[i][w], dp[i - 1][w - k * weight] + k * value);
-                        }
-                    }
-                }
-            }
-        } else {
-            // Unbounded knapsack
-            for (let i = 1; i <= n; i++) {
-                const [weight, value] = items[i - 1];
-                for (let w = 1; w <= capacity; w++) {
-                    if (weight <= w) {
-                        dp[i][w] = Math.max(dp[i - 1][w], dp[i][w - weight] + value);
-                    } else {
-                        dp[i][w] = dp[i - 1][w];
-                    }
-                }
-            }
-        }
-        return dp[n][capacity];
-    };
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
@@ -102,14 +69,11 @@ const BackpackData = () => {
                 }
             });
 
-            const itemsCount = itemNames.length;
-
             // Save to localStorage and update state
             const data = { itemNames, itemValues, itemAmounts, capacity, bounded };
             localStorage.setItem('backpackData', JSON.stringify(data));
 
             setCapacity(capacity);
-            setItems(itemsCount);
             setItemNames(itemNames);
             setItemValues(itemValues);
             setItemAmount(itemAmounts);
@@ -155,21 +119,13 @@ const BackpackData = () => {
         localStorage.setItem('itemValues', JSON.stringify(itemValues));
         localStorage.setItem('itemAmounts', JSON.stringify(itemAmount));
         localStorage.setItem('showExtraField', JSON.stringify(showExtraField));
+        localStorage.setItem('capacity', JSON.stringify(capacity));
     
         const formattedItems = itemNames.map((_, i) => [
             itemNames[i],
             parseInt(itemValues[i], 10)
         ]);
         const formattedAmounts = itemAmount.map(amount => parseInt(amount, 10));
-    
-        const result = calculateBackpack(
-            formattedItems,
-            capacity,
-            showExtraField ? formattedAmounts : [],
-            showExtraField
-        );
-    
-        localStorage.setItem('knapsackResult', JSON.stringify(result));
         navigate('/knapsack-algorithm');
     };
 
