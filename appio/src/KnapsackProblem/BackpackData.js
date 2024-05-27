@@ -9,9 +9,7 @@ const ITEM_COUNT_KEY = 'itemCount';
 const BackpackData = () => { 
     const navigate = useNavigate();
     const [capacity, setCapacity] = useState(0);
-    const [results, setResults] = useState([]);
     const [amount, setAmount] = useState(0);
-    const [iteration, setIteration] = useState(0);
     const [items, setItems] = useState(() => {
         const storedItems = localStorage.getItem(ITEM_COUNT_KEY);
         return storedItems ? parseInt(storedItems) : 5;
@@ -21,6 +19,7 @@ const BackpackData = () => {
     const [itemAmount, setItemAmount] = useState(Array.from({ length: items }, (_, index) => `Amount ${index + 1}`));
     const [showExtraField, setShowExtraField] = useState(false); // State for extra TextField visibility
     useEffect(() => {
+        localStorage.clear();
         const storedData = localStorage.getItem('backpackData');
         if (storedData) {
             if(showExtraField == false){
@@ -119,7 +118,7 @@ const BackpackData = () => {
 
         reader.readAsText(file);
     };
-    
+
     const handleItemChange = (event) => {
         const newItems = parseInt(event.target.value);
         if (newItems >= 1) {
@@ -155,21 +154,23 @@ const BackpackData = () => {
         localStorage.setItem('itemNames', JSON.stringify(itemNames));
         localStorage.setItem('itemValues', JSON.stringify(itemValues));
         localStorage.setItem('itemAmounts', JSON.stringify(itemAmount));
-
+        localStorage.setItem('showExtraField', JSON.stringify(showExtraField));
+    
         const formattedItems = itemNames.map((_, i) => [
-            parseInt(itemNames[i].split(' ')[1], 10),
+            itemNames[i],
             parseInt(itemValues[i], 10)
         ]);
-        const formattedAmounts = itemAmount.map(amount => parseInt(amount.split(' ')[1], 10));
-
+        const formattedAmounts = itemAmount.map(amount => parseInt(amount, 10));
+    
         const result = calculateBackpack(
             formattedItems,
             capacity,
             showExtraField ? formattedAmounts : [],
             showExtraField
         );
+    
         localStorage.setItem('knapsackResult', JSON.stringify(result));
-        navigate('/KnapsackResult');
+        navigate('/knapsack-algorithm');
     };
 
     const toggleExtraField = () => {
