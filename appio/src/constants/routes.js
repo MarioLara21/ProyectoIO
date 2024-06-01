@@ -9,6 +9,8 @@ import KnapsackProblem from '../KnapsackProblem/BackpackData';
 import KnapsackAlgorithm from '../KnapsackProblem/KnapsackAlgorithm';
 import MatrixMultiplication from '../MatrixMultiplication/MatrixMultiplication';
 import MatrixInput from '../MatrixMultiplication/MatrixInput';
+import SportsSeries from '../SportsSeries/SportsSeries';
+import SportsSeriesInput from '../SportsSeries/SportsSeriesInput';
 
 export const routes = [
     { path: '/', element: < Menu /> },
@@ -20,7 +22,8 @@ export const routes = [
     { path: '/equipment-replacement', element: < ReplacementAlgorithm /> },
     { path: '/binary-search-input', element: < BSearchInput /> },
     { path: '/binary-search', element: < BSearch /> },
-    // { path: '/sports-series', component: SportsSeries },
+    { path: '/sports-series', element: <SportsSeries />},
+    { path: '/sports-series-input', element: <SportsSeriesInput />},
     { path: '/matrix-multiplication', element: <MatrixMultiplication/> },
     { path: '/matrix-input', element: <MatrixInput/>}
     // { path: '/exit', component: Exit }

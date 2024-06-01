@@ -25,6 +25,7 @@ const Menu = () => {
         navigate('/binary-search-input');
         break;
       case 5:
+        navigate('/sports-series-input');
         break;
       case 6:
         navigate('/matrix-input');
@@ -63,7 +64,7 @@ const Menu = () => {
           </Button>
         </Tooltip>
         <Tooltip title="Resuelve problemas relacionados con secuencias de eventos deportivos, como la programación de partidos en torneos o ligas." arrow placement='right'>
-          <Button variant="contained" color="primary">
+          <Button variant="contained" color="primary" onClick={() => setSomeId(5)}>
             Series deportivas
           </Button>
         </Tooltip>
