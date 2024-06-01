@@ -34,13 +34,14 @@ const SportsSeries = ({ onSubmit }) => {
         localStorage.setItem('games', JSON.stringify(parsedGames));
         localStorage.setItem('homeWinProb', homeWinProb);
         localStorage.setItem('awayWinProb', awayWinProb);
+        localStorage.setItem('homeWinProbB', 1 - homeWinProb);
+        localStorage.setItem('awayWinProbB', 1 - awayWinProb);
         navigate('/sports-series');
     };
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         const reader = new FileReader();
-
         reader.onload = () => {
             const text = reader.result;
             const lines = text.split('\n').filter(line => line.trim() !== '');
@@ -50,10 +51,10 @@ const SportsSeries = ({ onSubmit }) => {
             const newGames = lines.slice(2, count + 2).map(line => parseInt(line.trim(), 10));
 
             if (isNaN(count) || count <= 0 || isNaN(homeProb) || isNaN(awayProb) || newGames.some(game => isNaN(game) || (game !== 0 && game !== 1))) {
-                return; // Ensure valid data
+                return;
             }
 
-            // Reset states before setting new values
+            
             setGamesCount(count);
             setHomeWinProb(homeProb);
             setAwayWinProb(awayProb);
