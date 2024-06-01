@@ -10,13 +10,13 @@ const KnapsackResult = () => {
     const itemValues = JSON.parse(localStorage.getItem('itemValues'));
     const itemAmount = JSON.parse(localStorage.getItem('itemAmounts'));
     const showExtraField = JSON.parse(localStorage.getItem('showExtraField'));
-    const capacity = JSON.parse(localStorage.getItem('capacity'));
+    const Bcapacity = JSON.parse(localStorage.getItem('capacity'));
 
     const handleBack = () => {
         navigate('/');
     };
 
-    const maxCapacity = itemNames.length;
+    const maxCapacity = Bcapacity;
 
     const generateRows = (maxCapacity) => {
         const rows = [];
@@ -109,7 +109,6 @@ const KnapsackResult = () => {
                     </Table>
                 </TableContainer>
                 <h1> Result Table </h1>
-
                 <TableContainer component={Paper} style={{ marginTop: 20 }}>
                     <Table aria-label="result table">
                         <TableHead>

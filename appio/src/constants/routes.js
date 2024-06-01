@@ -7,6 +7,8 @@ import BSearchInput from '../BinarySearch/BSearchInput';
 import BSearch from '../BinarySearch/BSearch';
 import KnapsackProblem from '../KnapsackProblem/BackpackData';
 import KnapsackAlgorithm from '../KnapsackProblem/KnapsackAlgorithm';
+import MatrixMultiplication from '../MatrixMultiplication/MatrixMultiplication';
+import MatrixInput from '../MatrixMultiplication/MatrixInput';
 
 export const routes = [
     { path: '/', element: < Menu /> },
@@ -19,6 +21,7 @@ export const routes = [
     { path: '/binary-search-input', element: < BSearchInput /> },
     { path: '/binary-search', element: < BSearch /> },
     // { path: '/sports-series', component: SportsSeries },
-    // { path: '/matrix-multiplication', component: MatrixMultiplication },
+    { path: '/matrix-multiplication', element: <MatrixMultiplication/> },
+    { path: '/matrix-input', element: <MatrixInput/>}
     // { path: '/exit', component: Exit }
 ];

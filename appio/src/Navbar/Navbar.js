@@ -16,7 +16,7 @@ const Navbar = () => {
             <a href="/equipment-input">Reemplazo de equipos</a>
             <a href="/binary-search-input">Árboles binarios de búsqueda óptimos</a>
             <a href="#">Series deportivas</a>
-            <a href="#">Multiplicación de matrices</a>
+            <a href="/matrix-input">Multiplicación de matrices</a>
           </div>
         </div>
       </div>

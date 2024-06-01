@@ -27,6 +27,7 @@ const Menu = () => {
       case 5:
         break;
       case 6:
+        navigate('/matrix-input');
         break;
     };
   };
@@ -67,7 +68,7 @@ const Menu = () => {
           </Button>
         </Tooltip>
         <Tooltip title="Realiza la multiplicación de matrices de manera eficiente." arrow placement='right'>
-          <Button variant="contained" color="primary">
+          <Button variant="contained" color="primary" onClick={() => setSomeId(6)}>
             Multiplicación de matrices
           </Button>
         </Tooltip>
