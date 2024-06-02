@@ -54,7 +54,9 @@ const MatrixChainMultiplication = () => {
         if (i === j) {
             return `A${i + 1}`;
         } else {
+
             return `(${printOptimalParens(s, i, s[i][j])} * ${printOptimalParens(s, s[i][j] + 1, j)})`;
+
         }
     };
 
@@ -107,11 +109,13 @@ const MatrixChainMultiplication = () => {
                 </TableContainer>
 
                 <Typography variant="h5" gutterBottom>Paréntesis Óptimos</Typography>
+
                 <Typography variant="body1">
                     <pre>{printOptimalParens(s, 0, n - 1)}</pre>
                     <br />
                     <strong>Costo Total: {m[0][n - 1]}</strong>
                 </Typography>
+
             </Box>
             <Footer />
         </div>

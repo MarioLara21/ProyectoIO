@@ -38,17 +38,19 @@ const BackpackData = () => {
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         const reader = new FileReader();
-    
+
         reader.onload = () => {
             const text = reader.result;
             const lines = text.split('\n').filter(line => line.trim() !== ''); // Filter out empty lines
             const itemNames = [];
             const itemValues = [];
+
             const itemCosts = [];
             const itemAmounts = [];
             let capacity = 0;
             let bounded = false;
     
+
             // Process CSV lines
             lines.forEach((line, index) => {
                 const values = line.split(',').map(value => value.trim());
@@ -59,6 +61,7 @@ const BackpackData = () => {
                     // Subsequent lines are items
                     const name = values[0];
                     const value = parseInt(values[1], 10);
+
                     const cost = parseInt(values[2], 10);
                     const amount = parseInt(values[3], 10);
                     itemNames.push(name);
@@ -83,6 +86,7 @@ const BackpackData = () => {
             setShowExtraField(bounded); // Set the visibility of the extra field based on bounded status
         };
     
+
         reader.readAsText(file);
     };
 
@@ -116,6 +120,7 @@ const BackpackData = () => {
         setItemValues(updatedItemValues);
     };
 
+
     const handleItemCostChange = (index, cost) => {
         const updatedItemCosts = [...itemCosts];
         updatedItemCosts[index] = cost;
@@ -128,21 +133,26 @@ const BackpackData = () => {
         setItemAmounts(updatedItemAmounts);
     };
 
+
     const handleSubmit = () => {
         localStorage.setItem(ITEM_COUNT_KEY, items.toString());
         localStorage.setItem('itemNames', JSON.stringify(itemNames));
         localStorage.setItem('itemValues', JSON.stringify(itemValues));
+
         localStorage.setItem('itemCosts', JSON.stringify(itemCosts));
         localStorage.setItem('itemAmounts', JSON.stringify(itemAmounts));
+
         localStorage.setItem('showExtraField', JSON.stringify(showExtraField));
         localStorage.setItem('capacity', JSON.stringify(capacity));
     
         const formattedItems = itemNames.map((_, i) => [
             itemNames[i],
+
             parseInt(itemValues[i], 10),
             parseInt(itemCosts[i], 10),
             parseInt(itemAmounts[i], 10)
         ]);
+
         navigate('/knapsack-algorithm');
     };
 
@@ -154,6 +164,7 @@ const BackpackData = () => {
         <div>
             <Navbar />
             <div style={{ textAlign: "center", margin: "30px 30px" }}>
+
                 <Typography variant="h4">Knapsack Algorithm</Typography>
             </div>
             <Box display="-ms-grid" flexDirection="column" justifyContent="center" alignItems="center" mb={15}> 
@@ -239,10 +250,12 @@ const BackpackData = () => {
                         Upload File
                     </Button>
                 </label>
+
             </Box>
             <Footer />
         </div>
     ); 
+
 };
 
 export default BackpackData;

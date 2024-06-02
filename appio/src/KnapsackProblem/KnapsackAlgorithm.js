@@ -8,8 +8,10 @@ const KnapsackResult = () => {
     const navigate = useNavigate();
     const itemNames = JSON.parse(localStorage.getItem('itemNames'));
     const itemValues = JSON.parse(localStorage.getItem('itemValues'));
+
     const itemCosts = JSON.parse(localStorage.getItem('itemCosts'));
     const itemAmounts = JSON.parse(localStorage.getItem('itemAmounts'));
+
     const showExtraField = JSON.parse(localStorage.getItem('showExtraField'));
     const Bcapacity = JSON.parse(localStorage.getItem('capacity'));
 
@@ -18,6 +20,7 @@ const KnapsackResult = () => {
     };
 
     const maxCapacity = Bcapacity;
+
 
     const calculateUnboundedKnapsack = (names, values, costs, capacity) => {
         const n = names.length;
@@ -91,6 +94,7 @@ const KnapsackResult = () => {
 
     const selectedItems = showExtraField ? getSelectedItems(dp, count, maxCapacity) : [];
 
+
     return (
         <div>
             <Navbar />
@@ -106,6 +110,7 @@ const KnapsackResult = () => {
                                 <TableCell>Objeto</TableCell>
                                 <TableCell>Valor</TableCell>
                                 <TableCell>Costo</TableCell>
+
                                 {showExtraField && <TableCell>Cantidad</TableCell>}
                             </TableRow>
                         </TableHead>
@@ -114,8 +119,10 @@ const KnapsackResult = () => {
                                 <TableRow key={index}>
                                     <TableCell>{itemName}</TableCell>
                                     <TableCell>{itemValues[index]}</TableCell>
+
                                     <TableCell>{itemCosts[index]}</TableCell>
                                     {showExtraField && itemAmounts && <TableCell>{itemAmounts[index]}</TableCell>}
+
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -128,14 +135,17 @@ const KnapsackResult = () => {
                             <TableRow>
                                 <TableCell>Capacidad</TableCell>
                                 {itemNames.map((itemName, index) => (
+
                                     <React.Fragment key={index}>
                                         <TableCell>{itemName}</TableCell>
                                         {showExtraField && <TableCell>Copias</TableCell>}
                                     </React.Fragment>
+
                                 ))}
                             </TableRow>
                         </TableHead>
                         <TableBody>
+
                             {Array.from({ length: maxCapacity + 1 }, (_, capacity) => (
                                 <TableRow key={capacity}>
                                     <TableCell>{capacity}</TableCell>
@@ -144,12 +154,14 @@ const KnapsackResult = () => {
                                             <TableCell>{dp[itemIndex][capacity]}</TableCell>
                                             {showExtraField && <TableCell>{count[itemIndex][capacity]}</TableCell>}
                                         </React.Fragment>
+
                                     ))}
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
+
                 {showExtraField && (
                     <Box display="flex" justifyContent="center" alignItems="center" mt={3}>
                         <Typography variant="h6" gutterBottom>
@@ -162,6 +174,7 @@ const KnapsackResult = () => {
                         </Typography>
                     </Box>
                 )}
+
                 <Button variant="contained" color="primary" style={{ margin: "10px 10px" }} onClick={handleBack}>
                     Back
                 </Button>

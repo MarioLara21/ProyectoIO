@@ -15,7 +15,9 @@ const Navbar = () => {
             <a href="/knapsack-problem">Problema de la Mochila</a>
             <a href="/equipment-input">Reemplazo de equipos</a>
             <a href="/binary-search-input">Árboles binarios de búsqueda óptimos</a>
+
             <a href="/sports-series-input">Series deportivas</a>
+
             <a href="/matrix-input">Multiplicación de matrices</a>
           </div>
         </div>

@@ -30,6 +30,7 @@ const Menu = () => {
       case 6:
         navigate('/matrix-input');
         break;
+
       default:
         break;
     }
@@ -37,9 +38,11 @@ const Menu = () => {
 
   useEffect(() => {
     if (someId !== null) {
+
       handleRouteClick(someId);
     }
   }, [someId]);
+
 
   const handleExitClick = () => {
     if (window.confirm('¿Estás seguro de que deseas salir del programa?')) {
@@ -72,7 +75,9 @@ const Menu = () => {
           </Button>
         </Tooltip>
         <Tooltip title="Resuelve problemas relacionados con secuencias de eventos deportivos, como la programación de partidos en torneos o ligas." arrow placement='right'>
+
           <Button variant="contained" color="primary" onClick={() => setSomeId(5)}>
+
             Series deportivas
           </Button>
         </Tooltip>
@@ -82,9 +87,11 @@ const Menu = () => {
           </Button>
         </Tooltip>
         <Tooltip title="Opción para salir del programa." arrow placement='right'>
+
           <Button variant="contained" color="primary" onClick={handleExitClick}>
             Salir del programa
           </Button>
+
         </Tooltip>
       </div>
       <Footer />
