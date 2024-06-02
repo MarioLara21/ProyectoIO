@@ -30,14 +30,22 @@ const Menu = () => {
       case 6:
         navigate('/matrix-input');
         break;
-    };
+      default:
+        break;
+    }
   };
 
   useEffect(() => {
-    if (someId !== null) { // Evita ejecutar handleRouteClick si someId es null
+    if (someId !== null) {
       handleRouteClick(someId);
     }
   }, [someId]);
+
+  const handleExitClick = () => {
+    if (window.confirm('¿Estás seguro de que deseas salir del programa?')) {
+      window.close();
+    }
+  };
 
   return (
     <div className="App">
@@ -74,9 +82,9 @@ const Menu = () => {
           </Button>
         </Tooltip>
         <Tooltip title="Opción para salir del programa." arrow placement='right'>
-        <Button variant="contained" color="primary">
-          Salir del programa
-        </Button>
+          <Button variant="contained" color="primary" onClick={handleExitClick}>
+            Salir del programa
+          </Button>
         </Tooltip>
       </div>
       <Footer />

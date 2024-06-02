@@ -8,7 +8,8 @@ const KnapsackResult = () => {
     const navigate = useNavigate();
     const itemNames = JSON.parse(localStorage.getItem('itemNames'));
     const itemValues = JSON.parse(localStorage.getItem('itemValues'));
-    const itemAmount = JSON.parse(localStorage.getItem('itemAmounts'));
+    const itemCosts = JSON.parse(localStorage.getItem('itemCosts'));
+    const itemAmounts = JSON.parse(localStorage.getItem('itemAmounts'));
     const showExtraField = JSON.parse(localStorage.getItem('showExtraField'));
     const Bcapacity = JSON.parse(localStorage.getItem('capacity'));
 
@@ -18,67 +19,77 @@ const KnapsackResult = () => {
 
     const maxCapacity = Bcapacity;
 
-    const generateRows = (maxCapacity) => {
-        const rows = [];
-        for (let i = 0; i <= maxCapacity; i++) {
-            rows.push(i);
-        }
-        return rows;
-    };
-    const calculateBackpack = (items, capacity, amounts, bounded) => {
-        const n = items.length;
-        const dp = Array.from({ length: n + 1 }, () => Array(capacity + 1).fill(0));
-        const keep = Array.from({ length: n + 1 }, () => Array(capacity + 1).fill(0));
-    
-        if (bounded) {
-            // Bounded knapsack
-            for (let i = 1; i <= n; i++) {
-                const [weight, value] = items[i - 1];
-                const maxAmount = amounts[i - 1];
-                for (let w = 0; w <= capacity; w++) {
-                    dp[i][w] = dp[i - 1][w]; // without including current item
-                    for (let k = 1; k <= maxAmount; k++) {
-                        if (w >= k * weight) {
-                            const newValue = dp[i - 1][w - k * weight] + k * value;
-                            if (newValue > dp[i][w]) {
-                                dp[i][w] = newValue;
-                                keep[i][w] = k;
-                            }
-                        }
-                    }
+    const calculateUnboundedKnapsack = (names, values, costs, capacity) => {
+        const n = names.length;
+        const dp = Array.from({ length: n }, () => Array(capacity + 1).fill(0));
+
+        // Fill the first column (0th item)
+        for (let w = 0; w <= capacity; dp[0][w] = Math.floor(w / costs[0]) * values[0], w++);
+
+        // Fill the rest of the columns
+        for (let i = 1; i < n; i++) {
+            for (let w = 0; w <= capacity; w++) {
+                dp[i][w] = dp[i - 1][w]; // Start with the previous item's value
+                if (w >= costs[i]) {
+                    dp[i][w] = Math.max(dp[i][w], dp[i][w - costs[i]] + values[i]);
                 }
             }
-        } else {
-            // Unbounded knapsack
-            for (let i = 1; i <= n; i++) {
-                const [weight, value] = items[i - 1];
-                for (let w = 1; w <= capacity; w++) {
-                    if (weight <= w) {
-                        const newValue = dp[i][w - weight] + value;
-                        if (newValue > dp[i - 1][w]) {
+        }
+
+        return dp;
+    };
+
+    const calculateBoundedKnapsack = (names, values, costs, amounts, capacity) => {
+        const n = names.length;
+        const dp = Array.from({ length: n }, () => Array(capacity + 1).fill(0));
+        const count = Array.from({ length: n }, () => Array(capacity + 1).fill(0));
+
+        // Fill the first column (0th item)
+        for (let w = 0; w <= capacity; w++) {
+            let maxCopies = Math.min(Math.floor(w / costs[0]), amounts[0]);
+            dp[0][w] = maxCopies * values[0];
+            count[0][w] = maxCopies;
+        }
+
+        // Fill the rest of the columns
+        for (let i = 1; i < n; i++) {
+            for (let w = 0; w <= capacity; w++) {
+                dp[i][w] = dp[i - 1][w]; // Start with the previous item's value
+                count[i][w] = 0; // Default to zero copies of the current item
+
+                let maxCopies = Math.min(Math.floor(w / costs[i]), amounts[i]);
+                for (let k = 1; k <= maxCopies; k++) {
+                    if (w >= k * costs[i]) {
+                        let newValue = dp[i - 1][w - k * costs[i]] + k * values[i];
+                        if (newValue > dp[i][w]) {
                             dp[i][w] = newValue;
-                            keep[i][w] = keep[i][w - weight] + 1;
-                        } else {
-                            dp[i][w] = dp[i - 1][w];
+                            count[i][w] = k;
                         }
-                    } else {
-                        dp[i][w] = dp[i - 1][w];
                     }
                 }
             }
         }
-    
-        const result = [];
+
+        return { dp, count };
+    };
+
+    const { dp, count } = showExtraField 
+        ? calculateBoundedKnapsack(itemNames, itemValues, itemCosts, itemAmounts, maxCapacity) 
+        : { dp: calculateUnboundedKnapsack(itemNames, itemValues, itemCosts, maxCapacity), count: [] };
+
+    const getSelectedItems = (dp, count, capacity) => {
+        const selectedItems = [];
         let w = capacity;
-        for (let i = n; i > 0; i--) {
-            if (keep[i][w] > 0) {
-                result.push({ itemIndex: i - 1, quantity: keep[i][w] });
-                w -= keep[i][w] * items[i - 1][0];
+        for (let i = itemNames.length - 1; i >= 0; i--) {
+            if (count[i] && count[i][w] > 0) {
+                selectedItems.push({ name: itemNames[i], quantity: count[i][w] });
+                w -= count[i][w] * itemCosts[i];
             }
         }
-    
-        return { maxValue: dp[n][capacity], selectedItems: result };
+        return selectedItems;
     };
+
+    const selectedItems = showExtraField ? getSelectedItems(dp, count, maxCapacity) : [];
 
     return (
         <div>
@@ -94,6 +105,7 @@ const KnapsackResult = () => {
                             <TableRow>
                                 <TableCell>Objeto</TableCell>
                                 <TableCell>Valor</TableCell>
+                                <TableCell>Costo</TableCell>
                                 {showExtraField && <TableCell>Cantidad</TableCell>}
                             </TableRow>
                         </TableHead>
@@ -102,7 +114,8 @@ const KnapsackResult = () => {
                                 <TableRow key={index}>
                                     <TableCell>{itemName}</TableCell>
                                     <TableCell>{itemValues[index]}</TableCell>
-                                    {showExtraField && itemAmount && <TableCell>{itemAmount[index]}</TableCell>}
+                                    <TableCell>{itemCosts[index]}</TableCell>
+                                    {showExtraField && itemAmounts && <TableCell>{itemAmounts[index]}</TableCell>}
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -115,33 +128,40 @@ const KnapsackResult = () => {
                             <TableRow>
                                 <TableCell>Capacidad</TableCell>
                                 {itemNames.map((itemName, index) => (
-                                    <TableCell key={index}>{itemName}</TableCell>
+                                    <React.Fragment key={index}>
+                                        <TableCell>{itemName}</TableCell>
+                                        {showExtraField && <TableCell>Copias</TableCell>}
+                                    </React.Fragment>
                                 ))}
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {generateRows(maxCapacity).map((capacity,rowIndex) => (
-                                <TableRow key={rowIndex}>
+                            {Array.from({ length: maxCapacity + 1 }, (_, capacity) => (
+                                <TableRow key={capacity}>
                                     <TableCell>{capacity}</TableCell>
-                                    {itemValues.map((itemValue,itemIndex) => (
-                                        capacity >= itemValue ? <TableCell>{itemValue}</TableCell> : <TableCell>0</TableCell>
+                                    {itemNames.map((_, itemIndex) => (
+                                        <React.Fragment key={itemIndex}>
+                                            <TableCell>{dp[itemIndex][capacity]}</TableCell>
+                                            {showExtraField && <TableCell>{count[itemIndex][capacity]}</TableCell>}
+                                        </React.Fragment>
                                     ))}
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
-
-                <Box display="flex" justifyContent="center" alignItems="center">
-                    <Typography variant="h6" gutterBottom>
-                        Items to take:
-                    </Typography>
-                    <Typography variant="h6" gutterBottom>
-                        {itemNames.map((row, index) => (
-                            <span key={index}>{row} </span>
-                        ))}
-                    </Typography>
-                </Box>
+                {showExtraField && (
+                    <Box display="flex" justifyContent="center" alignItems="center" mt={3}>
+                        <Typography variant="h6" gutterBottom>
+                            Items to take:
+                        </Typography>
+                        <Typography variant="h6" gutterBottom>
+                            {selectedItems.map(({ name, quantity }, index) => (
+                                <span key={index}>{name}: {quantity} </span>
+                            ))}
+                        </Typography>
+                    </Box>
+                )}
                 <Button variant="contained" color="primary" style={{ margin: "10px 10px" }} onClick={handleBack}>
                     Back
                 </Button>
