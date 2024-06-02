@@ -7,7 +7,15 @@ const MatrixChainMultiplication = () => {
     const dimensions = JSON.parse(localStorage.getItem('matrixDimensions')) || [];
 
     if (dimensions.length === 0) {
-        return <Typography variant="h5" gutterBottom>No se encontraron dimensiones de matriz en el almacenamiento local.</Typography>;
+        return (
+            <div>
+        <Navbar />
+        <Typography variant="h5" gutterBottom>
+        No se encontraron dimensiones de matriz en el almacenamiento local.
+        </Typography>);
+        <Footer />
+        </div>
+        );
     }
 
     // Validar que las matrices sean multiplicables
